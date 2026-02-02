@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prueba de Conexión Backend</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .success { color: green; }
+        .error { color: red; }
+        .loading { color: orange; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 5px; overflow: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔗 Prueba de Conexión Backend-Frontend</h1>
+    
+    <h2>Frontend: <a href="https://katalog-design.netlify.app" target="_blank">katalog-design.netlify.app</a></h2>
+    <h2>Backend: <a href="https://katalog-backend-0yn2.onrender.com" target="_blank">katalog-backend-0yn2.onrender.com</a></h2>
+    
+    <div id="tests">
+        <div class="test" id="test1">
+            <h3>1. Probando conexión básica...</h3>
+            <p class="loading">⏳ Probando...</p>
+        </div>
+        
+        <div class="test" id="test2">
+            <h3>2. Probando health check...</h3>
+            <p class="loading">⏳ Probando...</p>
+        </div>
+        
+        <div class="test" id="test3">
+            <h3>3. Probando CORS...</h3>
+            <p class="loading">⏳ Probando...</p>
+        </div>
+        
+        <div class="test" id="test4">
+            <h3>4. Probando Firebase...</h3>
+            <p class="loading">⏳ Probando...</p>
+        </div>
+    </div>
+    
+    <div id="summary" style="margin-top: 30px; padding: 20px; background: #f0f0f0; border-radius: 5px;">
+        <h2>📊 Resumen de Pruebas</h2>
+        <div id="summary-content"></div>
+    </div>
+
+    <script>
+        const tests = [
+            {
+                id: 'test1',
+                name: 'Conexión básica',
+                url: 'https://katalog-backend-0yn2.onrender.com/',
+                method: 'GET'
+            },
+            {
+                id: 'test2',
+                name: 'Health check',
+                url: 'https://katalog-backend-0yn2.onrender.com/health',
+                method: 'GET'
+            },
+            {
+                id: 'test3',
+                name: 'CORS desde frontend',
+                url: 'https://katalog-backend-0yn2.onrender.com/health',
+                method: 'GET',
+                cors: true
+            },
+            {
+                id: 'test4',
+                name: 'Verificar servicios',
+                url: 'https://katalog-backend-0yn2.onrender.com/health',
+                method: 'GET',
+                checkServices: true
+            }
+        ];
+
+        async function runTest(test) {
+            const testElement = document.getElementById(test.id);
+            const statusElement = testElement.querySelector('p');
+            
+            try {
+                const options = {
+                    method: test.method,
+                    headers: {}
+                };
+                
+                if (test.cors) {
+                    // Simular una solicitud desde el frontend
+                    options.mode = 'cors';
+                }
+                
+                const response = await fetch(test.url, options);
+                const data = await response.json();
+                
+                statusElement.className = 'success';
+                statusElement.innerHTML = `✅ ${test.name}: Éxito (${response.status})`;
+                
+                // Mostrar detalles
+                const details = document.createElement('details');
+                const summary = document.createElement('summary');
+                summary.textContent = 'Ver detalles';
+                details.appendChild(summary);
+                
+                const pre = document.createElement('pre');
+                pre.textContent = JSON.stringify(data, null, 2);
+                details.appendChild(pre);
+                
+                testElement.appendChild(details);
+                
+                // Verificar servicios si es necesario
+                if (test.checkServices && data.services) {
+                    const servicesDiv = document.createElement('div');
+                    servicesDiv.innerHTML = '<h4>Servicios:</h4>';
+                    
+                    for (const [service, status] of Object.entries(data.services)) {
+                        servicesDiv.innerHTML += `<p>${service}: <strong>${status}</strong></p>`;
+                    }
+                    
+                    testElement.appendChild(servicesDiv);
+                }
+                
+                return { success: true, data };
+            } catch (error) {
+                statusElement.className = 'error';
+                statusElement.innerHTML = `❌ ${test.name}: Error - ${error.message}`;
+                return { success: false, error };
+            }
+        }
+
+        async function runAllTests() {
+            const results = [];
+            
+            for (const test of tests) {
+                results.push(await runTest(test));
+            }
+            
+            // Mostrar resumen
+            const summaryDiv = document.getElementById('summary-content');
+            const successful = results.filter(r => r.success).length;
+            const total = results.length;
+            
+            summaryDiv.innerHTML = `
+                <h3>${successful}/${total} pruebas exitosas</h3>
+                <p><strong>Frontend:</strong> https://katalog-design.netlify.app</p>
+                <p><strong>Backend:</strong> https://katalog-backend-0yn2.onrender.com</p>
+                ${successful === total ? 
+                    '<p style="color: green; font-weight: bold;">🎉 ¡Todas las pruebas pasaron! El sistema está funcionando correctamente.</p>' :
+                    '<p style="color: orange; font-weight: bold;">⚠️ Algunas pruebas fallaron. Revisa los detalles arriba.</p>'
+                }
+            `;
+        }
+
+        // Ejecutar pruebas cuando la página cargue
+        document.addEventListener('DOMContentLoaded', runAllTests);
+    </script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-// Import the functions you need from the SDKs you need
+// Configuración de Firebase para producción
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { 
   getAuth, 
@@ -24,7 +24,7 @@ import {
   limit 
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// Your web app's Firebase configuration
+// Configuración de Firebase (usa la de tu consola)
 const firebaseConfig = {
   apiKey: "AIzaSyDJWrsRZIxc6ugIH8GgwEeJVRIurTL_s7Q",
   authDomain: "katalog-e11bc.firebaseapp.com",
